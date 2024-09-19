@@ -132,9 +132,11 @@ def main():
                 return
             
             results = []
+            failed_companies = []
             completed_count = 0
             failed_count = 0
             total_companies = len(df)
+            progress_placeholder = st.empty()
             
             for idx, company_name in enumerate(df['업체명']):
                 kiscode, nice_info_url = find_kiscode_from_naver_search(company_name)
@@ -158,17 +160,25 @@ def main():
                     results.append(result)
                     completed_count += 1
                 else:
+                    failed_companies.append(company_name)
                     failed_count += 1
                 
+                remaining_count = total_companies - (idx + 1)
                 progress = (idx + 1) / total_companies * 100
-                st.write(f"진척율: {progress:.2f}% | 완료: {completed_count}개 | 실패: {failed_count}개 | 전체 작업 수: {total_companies}개")
+                progress_placeholder.write(f"진척율: {progress:.2f}% | 완료: {completed_count}개 | 실패: {failed_count}개 | 남은 작업 수: {remaining_count}개")
                 
                 # 각 요청 사이에 3초 딜레이 추가
                 time.sleep(3)
             
-            if results:
-                results_df = pd.DataFrame(results)
+            # 결과 출력
+            results_df = pd.DataFrame(results)
+            if not results_df.empty:
                 st.write(results_df)
+            
+            # 실패한 업체 목록 출력
+            if failed_companies:
+                st.write("다음 업체에서 정보를 찾을 수 없었습니다:")
+                st.write(pd.DataFrame(failed_companies, columns=['업체명']))
 
 if __name__ == "__main__":
     main()
