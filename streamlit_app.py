@@ -62,14 +62,14 @@ def get_company_info(kiscode):
         soup = BeautifulSoup(response.content, 'html.parser')
         
         company_info = {
-            '대표자': soup.find('p', string='대표자').find_next_sibling('strong').get_text(strip=True) if soup.find('p', string='대표자') else '-',
-            '본사주소': soup.find('p', string='본사주소').find_next_sibling('strong').get_text(strip=True) if soup.find('p', string='본사주소') else '-',
-            '그룹명': soup.find('p', string='그룹명').find_next_sibling('strong').get_text(strip=True) if soup.find('p', string='그룹명') else '-',
-            '사업자번호': soup.find('p', string='사업자번호').find_next_sibling('strong').get_text(strip=True) if soup.find('p', string='사업자번호') else '-',
-            '기업형태': soup.find('p', string='기업형태').find_next_sibling('strong').get_text(strip=True) if soup.find('p', string='기업형태') else '-',
-            '산업': soup.find('p', string='산업').find_next_sibling('strong').get_text(strip=True) if soup.find('p', string='산업') else '-',
-            '설립일자': soup.find('p', string='설립일자').find_next_sibling('strong').get_text(strip=True) if soup.find('p', string='설립일자') else '-',
-            '상장일자': soup.find('p', string='상장일자').find_next_sibling('strong').get_text(strip=True) if soup.find('p', string='상장일자') else '-'
+            '대표자': soup.find('p', string='대표자').find_next_sibling('strong').get_text(strip=True) if soup.find('p', string='대표자') else '',
+            '본사주소': soup.find('p', string='본사주소').find_next_sibling('strong').get_text(strip=True) if soup.find('p', string='본사주소') else '',
+            '그룹명': soup.find('p', string='그룹명').find_next_sibling('strong').get_text(strip=True) if soup.find('p', string='그룹명') else '',
+            '사업자번호': soup.find('p', string='사업자번호').find_next_sibling('strong').get_text(strip=True) if soup.find('p', string='사업자번호') else '',
+            '기업형태': soup.find('p', string='기업형태').find_next_sibling('strong').get_text(strip=True) if soup.find('p', string='기업형태') else '',
+            '산업': soup.find('p', string='산업').find_next_sibling('strong').get_text(strip=True) if soup.find('p', string='산업') else '',
+            '설립일자': soup.find('p', string='설립일자').find_next_sibling('strong').get_text(strip=True) if soup.find('p', string='설립일자') else '',
+            '상장일자': soup.find('p', string='상장일자').find_next_sibling('strong').get_text(strip=True) if soup.find('p', string='상장일자') else ''
         }
         
         revenue_row = soup.find('tr', class_='bdBck fwb')
@@ -83,12 +83,12 @@ def get_company_info(kiscode):
                 else:
                     revenue_data.append(text)
         else:
-            revenue_data = ['-', '-', '-']
+            revenue_data = ['', '', '']
         
         return company_info, revenue_data
     except requests.RequestException as e:
         st.error(f"Request failed: {e}")
-        return {}, ['-', '-', '-']
+        return {}, ['', '', '']
 
 # 스트림릿 웹 앱 구성
 def main():
@@ -106,14 +106,14 @@ def main():
                 result = {
                     '업체명': company_name,
                     'kiscode': kiscode,
-                    '대표자': company_info.get('대표자', '-'),
-                    '본사주소': company_info.get('본사주소', '-'),
-                    '그룹명': company_info.get('그룹명', '-'),
-                    '사업자번호': company_info.get('사업자번호', '-'),
-                    '기업형태': company_info.get('기업형태', '-'),
-                    '산업': company_info.get('산업', '-'),
-                    '설립일자': company_info.get('설립일자', '-'),
-                    '상장일자': company_info.get('상장일자', '-'),
+                    '대표자': company_info.get('대표자', ''),
+                    '본사주소': company_info.get('본사주소', ''),
+                    '그룹명': company_info.get('그룹명', ''),
+                    '사업자번호': company_info.get('사업자번호', ''),
+                    '기업형태': company_info.get('기업형태', ''),
+                    '산업': company_info.get('산업', ''),
+                    '설립일자': company_info.get('설립일자', ''),
+                    '상장일자': company_info.get('상장일자', ''),
                     '2023년 매출': revenue_data[0],
                     '2022년 매출': revenue_data[1],
                     '2021년 매출': revenue_data[2]
@@ -132,35 +132,35 @@ def main():
                 return
             
             results = []
-            failed_companies = []
+            total_companies = len(df)
             completed_count = 0
             failed_count = 0
-            total_companies = len(df)
             progress_placeholder = st.empty()
             
             for idx, company_name in enumerate(df['업체명']):
                 kiscode, nice_info_url = find_kiscode_from_naver_search(company_name)
+                company_info, revenue_data = ({'대표자': '', '본사주소': '', '그룹명': '', '사업자번호': '', '기업형태': '', '산업': '', '설립일자': '', '상장일자': ''}, ['', '', '']) if not kiscode else get_company_info(kiscode)
+                
+                result = {
+                    '업체명': company_name,
+                    'kiscode': kiscode if kiscode else '',
+                    '대표자': company_info.get('대표자', ''),
+                    '본사주소': company_info.get('본사주소', ''),
+                    '그룹명': company_info.get('그룹명', ''),
+                    '사업자번호': company_info.get('사업자번호', ''),
+                    '기업형태': company_info.get('기업형태', ''),
+                    '산업': company_info.get('산업', ''),
+                    '설립일자': company_info.get('설립일자', ''),
+                    '상장일자': company_info.get('상장일자', ''),
+                    '2023년 매출': revenue_data[0],
+                    '2022년 매출': revenue_data[1],
+                    '2021년 매출': revenue_data[2]
+                }
+                results.append(result)
+                
                 if kiscode:
-                    company_info, revenue_data = get_company_info(kiscode)
-                    result = {
-                        '업체명': company_name,
-                        'kiscode': kiscode,
-                        '대표자': company_info.get('대표자', '-'),
-                        '본사주소': company_info.get('본사주소', '-'),
-                        '그룹명': company_info.get('그룹명', '-'),
-                        '사업자번호': company_info.get('사업자번호', '-'),
-                        '기업형태': company_info.get('기업형태', '-'),
-                        '산업': company_info.get('산업', '-'),
-                        '설립일자': company_info.get('설립일자', '-'),
-                        '상장일자': company_info.get('상장일자', '-'),
-                        '2023년 매출': revenue_data[0],
-                        '2022년 매출': revenue_data[1],
-                        '2021년 매출': revenue_data[2]
-                    }
-                    results.append(result)
                     completed_count += 1
                 else:
-                    failed_companies.append(company_name)
                     failed_count += 1
                 
                 remaining_count = total_companies - (idx + 1)
@@ -175,10 +175,9 @@ def main():
             if not results_df.empty:
                 st.write(results_df)
             
-            # 실패한 업체 목록 출력
-            if failed_companies:
-                st.write("다음 업체에서 정보를 찾을 수 없었습니다:")
-                st.write(pd.DataFrame(failed_companies, columns=['업체명']))
-
+            if failed_count > 0:
+                st.write("다음 업체들은 정보를 찾을 수 없었습니다:")
+                st.write([res['업체명'] for res in results if not res['kiscode']])
+    
 if __name__ == "__main__":
     main()
