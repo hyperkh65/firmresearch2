@@ -168,7 +168,7 @@ def main():
                 progress_placeholder.write(f"진척율: {progress:.2f}% | 완료: {completed_count}개 | 실패: {failed_count}개 | 남은 작업 수: {remaining_count}개")
                 
                 # 각 요청 사이에 3초 딜레이 추가
-                time.sleep(1.5)
+                time.sleep(5)
             
             # 결과 출력
             results_df = pd.DataFrame(results)
