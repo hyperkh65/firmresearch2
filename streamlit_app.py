@@ -79,16 +79,16 @@ def get_company_info(kiscode):
             for td in revenues:
                 text = td.get_text(strip=True).replace(',', '').replace(' ', '')
                 if text.isdigit():
-                    revenue_data.append(f"{int(text) * 1000:,}")
+                    revenue_data.append(f"{int(text):,} 원")
                 else:
-                    revenue_data.append('-')
+                    revenue_data.append(text)
         else:
-            revenue_data = ['-'] * 3
+            revenue_data = ['-', '-', '-']
         
         return company_info, revenue_data
     except requests.RequestException as e:
         st.error(f"Request failed: {e}")
-        return {}, ['-'] * 3
+        return {}, ['-', '-', '-']
 
 # 스트림릿 웹 앱 구성
 def main():
@@ -132,6 +132,7 @@ def main():
                 return
             
             results = []
+            completed_count = 0
             failed_count = 0
             total_companies = len(df)
             
@@ -155,14 +156,15 @@ def main():
                         '2021년 매출': revenue_data[2]
                     }
                     results.append(result)
+                    completed_count += 1
                 else:
                     failed_count += 1
                 
                 progress = (idx + 1) / total_companies * 100
-                st.write(f"{total_companies}개 중 {idx + 1}개 진행 중 ({progress:.2f}% 완료, 실패: {failed_count}개)")
+                st.write(f"진척율: {progress:.2f}% | 완료: {completed_count}개 | 실패: {failed_count}개 | 전체 작업 수: {total_companies}개")
                 
-                # 각 요청 사이에 딜레이 추가 (예: 1초)
-                time.sleep(1)
+                # 각 요청 사이에 3초 딜레이 추가
+                time.sleep(3)
             
             if results:
                 results_df = pd.DataFrame(results)
